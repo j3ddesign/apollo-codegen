@@ -5,3 +5,4 @@ test
 !lib
 !lib/**/*
 !.gitignore
+!package.json
