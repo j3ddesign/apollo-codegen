@@ -33,8 +33,9 @@ export function loadAndMergeQueryDocuments(inputPaths) {
       allFiles.push(files);
     });
   });
-  const sources = inputPaths.map(inputPath => {
-    const body = fs.readFileSync(inputPath, 'utf8')
+  const sources = allFiles.map(inputPath => {
+    console.log('checking file: ', inputPath);
+    const body = fs.readFileSync(inputPath, 'utf8');
     if (!body) {
       return null;
     }
