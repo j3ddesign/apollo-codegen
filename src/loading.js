@@ -26,12 +26,13 @@ export function loadSchema(schemaPath) {
 }
 
 export function loadAndMergeQueryDocuments(inputPaths) {
-  if (typeof inputPaths === "string") {
-    glob(inputPaths, (err, files) => {
+  const allFiles = [];
+  inputPaths.forEach(path => {
+    glob(path, (err, files) => {
       if (err) throw new Error(err);
-      inputPaths = files;
-    })
-  }
+      allFiles.push(files);
+    });
+  });
   const sources = inputPaths.map(inputPath => {
     const body = fs.readFileSync(inputPath, 'utf8')
     if (!body) {
