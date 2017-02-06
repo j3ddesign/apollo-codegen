@@ -26,21 +26,34 @@ export function loadSchema(schemaPath) {
 }
 
 export function loadAndMergeQueryDocuments(inputPaths) {
-  const allFiles = [];
-  inputPaths.forEach(path => {
-    glob(path, (err, files) => {
-      if (err) throw new Error(err);
-      allFiles.push(files);
+  const getFileNames = (inputPaths) => {
+    return new Promise((resolve, reject) => {
+      let allFiles = [];
+      let checking = inputPaths.length;
+      inputPaths.forEach(path => {
+        glob(path, (err, files) => {
+          if (err) throw new Error(err);
+          allFiles = [...allFiles, ...files];
+          checking--;
+          if (!checking) {
+            resolve(allFiles);
+          }
+        });
+      });
     });
-  });
-  const sources = allFiles.map(inputPath => {
-    console.log('checking file: ', inputPath);
-    const body = fs.readFileSync(inputPath, 'utf8');
-    if (!body) {
-      return null;
-    }
-    return new Source(body, inputPath);
-  }).filter(source => source);
-
-  return concatAST(sources.map(source => parse(source)));
+  };
+  return getFileNames(inputPaths)
+    .then((files) => {
+    console.log('got files: ', files);
+      const sources = files.map(path => {
+        const inputPath = path;
+        const body = fs.readFileSync(inputPath, 'utf8');
+        if (!body) {
+          return null;
+        }
+        return new Source(body, inputPath);
+      }).filter(source => source);
+      return concatAST(sources.map(source => parse(source)));
+    })
+    .catch(e => console.error(e));
 }
